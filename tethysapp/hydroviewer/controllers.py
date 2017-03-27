@@ -13,8 +13,8 @@ def home(request):
     model_input = SelectInput(display_text='',
                               name='model',
                               multiple=False,
-                              options=[('ECMWF', 'wcmwf'), ('LIS', 'lis')],
-                              initial=['Model'],
+                              options=[('Select Model', ''), ('ECMWF-RAPID', 'ecmwf'), ('LIS-RAPID', 'lis')],
+                              initial=['Select Model'],
                               original=True)
     context = {
         'model_input': model_input,
