@@ -27,6 +27,12 @@ class Hydroviewer(TethysAppBase):
         url_maps = (UrlMap(name='home',
                            url='hydroviewer',
                            controller='hydroviewer.controllers.home'),
+                    UrlMap(name='ecmwf',
+                           url='ecmwf-rapid',
+                           controller='hydroviewer.controllers.ecmwf'),
+                    UrlMap(name='lis',
+                           url='lis-rapid',
+                           controller='hydroviewer.controllers.lis'),
         )
 
         return url_maps
