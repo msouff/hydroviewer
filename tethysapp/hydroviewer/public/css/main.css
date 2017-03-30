@@ -44,7 +44,7 @@
 #app-content-wrapper #app-content{
     height: 100%;
     padding-top: 60px;
-    padding-bottom: 50px;
+    /*padding-bottom: 50px;*/
 }
 
 #inner-app-content{
@@ -60,7 +60,7 @@
 
 /*OpenLayers map*/
 #map {
-    height: 95%
+    height: 100%;
 }
 
 #params {

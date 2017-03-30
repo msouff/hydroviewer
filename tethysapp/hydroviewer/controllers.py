@@ -19,6 +19,7 @@ def home(request):
                               options=[('Select Model', ''), ('ECMWF-RAPID', 'ecmwf'), ('LIS-RAPID', 'lis')],
                               initial=['Select Model'],
                               original=True)
+
     context = {
         'model_input': model_input,
     }
@@ -49,6 +50,7 @@ def ecmwf(request):
                                    options=watershed_list,
                                    initial=['Select Watershed'],
                                    original=True)
+
     context = {
         'model_input': model_input,
         'watershed_select': watershed_select,
@@ -68,6 +70,7 @@ def lis(request):
                               options=[('Select Model', ''), ('ECMWF-RAPID', 'ecmwf'), ('LIS-RAPID', 'lis')],
                               initial=['Select Model'],
                               original=True)
+
     context = {
         'model_input': model_input,
     }
