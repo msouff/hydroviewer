@@ -22,6 +22,18 @@ $(function () {
         })
     });
 
+    var stroke = new ol.style.Stroke({
+        color: '#000000',
+        width: 10
+    });
+
+    var Style1 = new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: '#000000',
+            width: 10
+        })
+    });
+
     var layer1 = new ol.layer.Vector({
         source: new ol.source.Vector({
             loader: function (extent) {
@@ -43,7 +55,21 @@ $(function () {
             },
             strategy: ol.loadingstrategy.bbox,
             projection: 'EPSG:3857'
-        })
+        }),
+        style: [
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(255,255,255,0.01)',
+                    width: 40
+                })
+            }),
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: '#00BFFF',
+                    width: 2
+                })
+            })
+        ]
     });
 
     window.loadFeatures = function (response) {
@@ -54,6 +80,12 @@ $(function () {
     map.addLayer(layer1);
     
     mapView = map.getView();
+
+    select_interaction = new ol.interaction.Select({
+        layers: [layer1],
+    });
+
+    map.addInteraction(select_interaction);
 });
 
 function submit_model() {
