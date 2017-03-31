@@ -33,6 +33,9 @@ class Hydroviewer(TethysAppBase):
                     UrlMap(name='lis',
                            url='lis-rapid',
                            controller='hydroviewer.controllers.lis'),
+                    UrlMap(name='get-time-series',
+                           url='ecmwf-rapid/get-time-series',
+                           controller='hydroviewer.controllers.get_time_series'),
         )
 
         return url_maps

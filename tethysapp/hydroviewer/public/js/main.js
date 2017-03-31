@@ -107,9 +107,15 @@ $(function () {
 
             map.addInteraction(select_interaction);
 
-            var features = select_interaction.getFeatures();
-            var feature = features.item(0);
-            console.log(features);
+            select_interaction.on('select', function (e) {
+                var comid = e.selected[0].get('COMID');
+                var model = location.pathname.split('hydroviewer/')[1].replace('/','');
+                var startdate = '';
+
+                get_time_series(model, watershed, subbasin, comid, startdate);
+
+            });
+
         } else {
             $("#inner-app-content").removeClass("row");
             $("#map").removeClass("col-md-7");
@@ -153,4 +159,73 @@ function submit_model() {
     } else if ($('#modelSelect option:selected').val() === 'lis') {
         location.href = 'http://' + location.host + '/apps/hydroviewer/lis-rapid/';
     };
+};
+
+function get_time_series(model, watershed, subbasin, comid, startdate) {
+    $.ajax({
+        type: 'GET',
+        url: 'get-time-series/',
+        dataType: 'json',
+        data: {
+            'model': model,
+            'watershed': watershed,
+            'subbasin': subbasin,
+            'comid': comid,
+            'startdate': startdate
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            // $('#info').html('<p class="alert alert-danger" style="text-align: center"><strong>An unknown error occurred while retrieving the data</strong></p>');
+            // clearErrorSelection();
+        },
+        beforeSend: function () {
+            // $('#info').html('<p class="alert alert-info" style="text-align: center"><strong>' +
+            //     'Retrieving forecasts' + '</strong></p>').removeClass('hidden');
+        },
+        complete: function () {
+            // setTimeout(function () {
+            //     $('#info').addClass('hidden')
+            // }, 5000);
+        },
+        success: function (data) {
+    //         if ("success" in data) {
+    //             if ("ts_pairs_data" in data) {
+    //                 var returned_tsPairsData = JSON.parse(data.ts_pairs_data);
+    //                 for (var key in returned_tsPairsData) {
+    //                     if (returned_tsPairsData[key][2] === 'notLong') {
+    //                         var d = new Date(0);
+    //                         startDate = d.setUTCSeconds(returned_tsPairsData[key][0]);
+    //                         seriesData = returned_tsPairsData[key][1];
+    //                         nc_chart.yAxis[0].setExtremes(null, null);
+    //                         plotData(config, geom, variable, seriesData, startDate);
+    //                     } else {
+    //
+    //                         for (j = 0; j < returned_tsPairsData[key].length; j++) {
+    //                             var d = new Date(0);
+    //                             var startDateG = d.setUTCSeconds(returned_tsPairsData[key][j][0]);
+    //                             for (i = 1; i < returned_tsPairsData[key][j].length - 1; i++) {
+    //                                 var seriesDataTemp = returned_tsPairsData[key][j][i];
+    //                                 var seriesDesc = 'Member 0' + String(i) + ' ' +
+    //                                     returned_tsPairsData[key][j][returned_tsPairsData[key][j].length - 1];
+    //                                 seriesDataGroup.push([seriesDataTemp, seriesDesc, startDateG]);
+    //                                 nc_chart.yAxis[0].setExtremes(null, null);
+    //                                 plotData(config, geom, variable, seriesDataTemp, startDateG, i - 1, seriesDesc);
+    //                             };
+    //                         };
+    //                     };
+    //                 };
+    //             };
+    //         } else if ("error" in data) {
+    //             $('#nc-chart').addClass('hidden')
+    //             $('#info').html('<p class="alert alert-danger" style="text-align: center"><strong>' + data['error'] + '</strong></p>').removeClass('hidden').addClass('error');
+    //
+    //             // Hide error message 5 seconds after showing it
+    //             setTimeout(function () {
+    //                 $('#info').addClass('hidden')
+    //             }, 5000);
+    //         } else {
+    //             viewer.entities.resumeEvents();
+    //             $('#info').html('<p><strong>An unexplainable error occurred. Why? Who knows...</strong></p>').removeClass('hidden');
+    //         };
+        }
+    });
 };

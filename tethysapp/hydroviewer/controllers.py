@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 
 from tethys_sdk.gizmos import SelectInput, ToggleSwitch, Button
 
@@ -9,10 +10,6 @@ import json
 
 @login_required()
 def home(request):
-    """
-    Controller for the app home page.
-    """
-
     model_input = SelectInput(display_text='',
                               name='model',
                               multiple=False,
@@ -28,10 +25,6 @@ def home(request):
 
 @login_required()
 def ecmwf(request):
-    """
-    Controller for the app home page.
-    """
-
     model_input = SelectInput(display_text='',
                               name='model',
                               multiple=False,
@@ -61,10 +54,6 @@ def ecmwf(request):
 
 @login_required()
 def lis(request):
-    """
-    Controller for the app home page.
-    """
-
     model_input = SelectInput(display_text='',
                               name='model',
                               multiple=False,
@@ -77,3 +66,31 @@ def lis(request):
     }
 
     return render(request, 'hydroviewer/lis.html', context)
+
+
+def get_time_series(request):
+    get_data = request.GET
+
+    try:
+        model = get_data['model']
+        watershed = get_data['watershed']
+        subbasin = get_data['subbasin']
+        comid = get_data['comid']
+        if get_data['startdate'] != '':
+            startdate = get_data['startdate']
+        else:
+            startdate = 'most_recent'
+
+        if model == 'ecmwf-rapid':
+            res = requests.get('https://tethys.byu.edu/apps/streamflow-prediction-tool/api/GetWaterML/?watershed_name=' +
+                               watershed + '&subbasin_name=' + subbasin + '&reach_id=' + comid + '&start_folder=' +
+                               startdate + '&stat_type=mean', headers={'Authorization': 'Token 72b145121add58bcc5843044d9f1006d9140b84b'})
+
+            forecast = json.loads(res.content)
+            print forecast, '********************'
+        else:
+            print model, '***************'
+
+    except Exception as e:
+        print str(e)
+        return JsonResponse({'error': 'No data found for the selected reach.'})
