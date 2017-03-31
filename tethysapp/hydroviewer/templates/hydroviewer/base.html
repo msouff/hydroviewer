@@ -17,11 +17,18 @@
   <div class="col-md-3">
     {{ tethys_app.name }}
   </div>
-  <div id="modelSelect" class="col-md-3" style="padding-top: 14px;">
-      {% gizmo select_input model_input %}
+  <div class="col-md-5">
+    <div class="row">
+      <div id="modelSelect" class="col-md-9" style="padding-top: 14px;">
+          {% gizmo select_input model_input %}
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-default" onclick="javascript:submit_model()">Submit</button>
+      </div>
+    </div>
   </div>
-  <div class="col-md-2">
-    <button class="btn btn-default" onclick="javascript:submit_model()">Submit</button>
+  <div id="watershedSelect" class="col-md-4" style="padding-top: 14px;">
+    {% gizmo select_input watershed_select %}
   </div>
 </div>
 {% endblock %}

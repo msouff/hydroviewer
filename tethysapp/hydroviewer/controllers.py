@@ -42,11 +42,12 @@ def ecmwf(request):
     res = requests.get('https://tethys.byu.edu/apps/streamflow-prediction-tool/api/GetWatersheds/',
                        headers={'Authorization': 'Token 72b145121add58bcc5843044d9f1006d9140b84b'})
 
-    watershed_list = json.loads(res.content)
+    watershed_list_raw = json.loads(res.content)
+    watershed_list = [value for value in watershed_list_raw if "Nepal" in value[0] or "NEPAL" in value[0] or "nepal" in value[0]]
     watershed_list.append(['Select Watershed', ''])
 
     watershed_select = SelectInput(display_text='',
-                                   name='watershed_select',
+                                   name='watershed',
                                    options=watershed_list,
                                    initial=['Select Watershed'],
                                    original=True)
@@ -68,11 +69,11 @@ def lis(request):
                               name='model',
                               multiple=False,
                               options=[('Select Model', ''), ('ECMWF-RAPID', 'ecmwf'), ('LIS-RAPID', 'lis')],
-                              initial=['Select Model'],
+                              initial=['LIS-RAPID'],
                               original=True)
 
     context = {
         'model_input': model_input,
     }
 
-    return render(request, 'hydroviewer/home.html', context)
+    return render(request, 'hydroviewer/lis.html', context)
