@@ -86,10 +86,9 @@ def get_time_series(request):
                                watershed + '&subbasin_name=' + subbasin + '&reach_id=' + comid + '&start_folder=' +
                                startdate + '&stat_type=mean', headers={'Authorization': 'Token 72b145121add58bcc5843044d9f1006d9140b84b'})
 
-            forecast = json.loads(res.content)
+
+            forecast = res.content
             print forecast, '********************'
-        else:
-            print model, '***************'
 
     except Exception as e:
         print str(e)
