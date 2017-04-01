@@ -6,7 +6,8 @@ from tethys_sdk.gizmos import SelectInput, ToggleSwitch, Button
 
 import requests
 import json
-
+import datetime as dt
+import time
 
 @login_required()
 def home(request):
@@ -22,6 +23,7 @@ def home(request):
     }
 
     return render(request, 'hydroviewer/home.html', context)
+
 
 @login_required()
 def ecmwf(request):
@@ -51,6 +53,7 @@ def ecmwf(request):
     }
 
     return render(request, 'hydroviewer/ecmwf.html', context)
+
 
 @login_required()
 def lis(request):
@@ -87,8 +90,29 @@ def get_time_series(request):
                                startdate + '&stat_type=mean', headers={'Authorization': 'Token 72b145121add58bcc5843044d9f1006d9140b84b'})
 
 
-            forecast = res.content
-            print forecast, '********************'
+            api_call = res.content
+            data = api_call.split('dateTimeUTC="')
+            data.pop(0)
+
+            ts_pairs = []
+            ts_pairs_data = {}
+            for elem in data:
+                date = time.mktime(dt.datetime.strptime(elem.split('"  methodCode="1"  sourceCode="1"  qualityControlLevelCode="1" >')[0],
+                                                        '%Y-%m-%dT%H:%M:%S').timetuple())
+                value = float(elem.split('  methodCode="1"  sourceCode="1"  qualityControlLevelCode="1" >')[1].split('</value>')[0])
+
+                ts_pairs.append([date, value])
+
+            ts_pairs_data['watershed'] = watershed
+            ts_pairs_data['subbasin'] = subbasin
+            ts_pairs_data['id'] = comid
+            ts_pairs_data['ts_pairs'] = ts_pairs
+
+
+            return JsonResponse({
+                "success": "Data analysis complete!",
+                "ts_pairs_data": json.dumps(ts_pairs_data)
+            })
 
     except Exception as e:
         print str(e)
