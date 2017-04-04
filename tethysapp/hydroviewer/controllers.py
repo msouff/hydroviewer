@@ -101,13 +101,12 @@ def get_time_series(request):
                                                         '%Y-%m-%dT%H:%M:%S').timetuple())
                 value = float(elem.split('  methodCode="1"  sourceCode="1"  qualityControlLevelCode="1" >')[1].split('</value>')[0])
 
-                ts_pairs.append([date, value])
+                ts_pairs.append([date * 1e3, value])
 
             ts_pairs_data['watershed'] = watershed
             ts_pairs_data['subbasin'] = subbasin
             ts_pairs_data['id'] = comid
             ts_pairs_data['ts_pairs'] = ts_pairs
-
 
             return JsonResponse({
                 "success": "Data analysis complete!",
@@ -117,3 +116,31 @@ def get_time_series(request):
     except Exception as e:
         print str(e)
         return JsonResponse({'error': 'No data found for the selected reach.'})
+
+
+def get_available_dates(request):
+    get_data = request.GET
+
+    watershed = get_data['watershed']
+    subbasin = get_data['subbasin']
+
+    res = requests.get('https://tethys.byu.edu/apps/streamflow-prediction-tool/api/GetAvailableDates/?watershed_name=' + watershed +
+                       '&subbasin_name=' + subbasin, headers={'Authorization': 'Token 72b145121add58bcc5843044d9f1006d9140b84b'})
+
+    dates = []
+    for date in eval(res.content):
+        if len(date) == 10:
+            date_mod = date + '000'
+            date_f = dt.datetime.strptime(date_mod , '%Y%m%d.%H%M').strftime('%Y-%m-%d %H:%M')
+        else:
+            date_f = dt.datetime.strptime(date, '%Y%m%d.%H%M').strftime('%Y-%m-%d %H:%M')
+        dates.append([date_f, date])
+
+    dates.append(['Select Date', dates[-1][1]])
+    dates.reverse()
+
+    return JsonResponse({
+        "success": "Data analysis complete!",
+        "available_dates": json.dumps(dates)
+    })
+

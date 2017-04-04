@@ -112,9 +112,8 @@ $(function () {
                 var model = location.pathname.split('hydroviewer/')[1].replace('/','');
                 var startdate = '';
 
+                get_available_dates(watershed, subbasin);
                 get_time_series(model, watershed, subbasin, comid, startdate);
-
-                initChart();
 
             });
 
@@ -163,6 +162,35 @@ function submit_model() {
     };
 };
 
+function get_available_dates(watershed, subbasin) {
+    $.ajax({
+        type: 'GET',
+        url: 'get-available-dates/',
+        dataType: 'json',
+        data: {
+            'watershed': watershed,
+            'subbasin': subbasin
+        },
+        error: function () {
+            $('#dates').html(
+                '<p class="alert alert-danger" style="text-align: center"><strong>An error occurred while retrieving the available dates</strong></p>'
+            );
+
+            $('#dates').removeClass('hidden');
+        },
+        success: function (dates) {
+            datesParsed = JSON.parse(dates.available_dates)
+            $('#datesSelect').empty();
+
+            $.each(datesParsed, function(i, p) {
+                $('#datesSelect').append($('<option></option>').val(p[1]).html(p[0]));
+            });
+
+            $('#dates').removeClass('hidden');
+        }
+    });
+};
+
 function get_time_series(model, watershed, subbasin, comid, startdate) {
     $.ajax({
         type: 'GET',
@@ -179,181 +207,79 @@ function get_time_series(model, watershed, subbasin, comid, startdate) {
             // $('#info').html('<p class="alert alert-danger" style="text-align: center"><strong>An unknown error occurred while retrieving the data</strong></p>');
             // clearErrorSelection();
         },
-        beforeSend: function () {
-            // $('#info').html('<p class="alert alert-info" style="text-align: center"><strong>' +
-            //     'Retrieving forecasts' + '</strong></p>').removeClass('hidden');
-        },
-        complete: function () {
-            // setTimeout(function () {
-            //     $('#info').addClass('hidden')
-            // }, 5000);
-        },
         success: function (data) {
-    //         if ("success" in data) {
-    //             if ("ts_pairs_data" in data) {
-    //                 var returned_tsPairsData = JSON.parse(data.ts_pairs_data);
-    //                 for (var key in returned_tsPairsData) {
-    //                     if (returned_tsPairsData[key][2] === 'notLong') {
-    //                         var d = new Date(0);
-    //                         startDate = d.setUTCSeconds(returned_tsPairsData[key][0]);
-    //                         seriesData = returned_tsPairsData[key][1];
-    //                         nc_chart.yAxis[0].setExtremes(null, null);
-    //                         plotData(config, geom, variable, seriesData, startDate);
-    //                     } else {
-    //
-    //                         for (j = 0; j < returned_tsPairsData[key].length; j++) {
-    //                             var d = new Date(0);
-    //                             var startDateG = d.setUTCSeconds(returned_tsPairsData[key][j][0]);
-    //                             for (i = 1; i < returned_tsPairsData[key][j].length - 1; i++) {
-    //                                 var seriesDataTemp = returned_tsPairsData[key][j][i];
-    //                                 var seriesDesc = 'Member 0' + String(i) + ' ' +
-    //                                     returned_tsPairsData[key][j][returned_tsPairsData[key][j].length - 1];
-    //                                 seriesDataGroup.push([seriesDataTemp, seriesDesc, startDateG]);
-    //                                 nc_chart.yAxis[0].setExtremes(null, null);
-    //                                 plotData(config, geom, variable, seriesDataTemp, startDateG, i - 1, seriesDesc);
-    //                             };
-    //                         };
-    //                     };
-    //                 };
-    //             };
-    //         } else if ("error" in data) {
-    //             $('#nc-chart').addClass('hidden')
-    //             $('#info').html('<p class="alert alert-danger" style="text-align: center"><strong>' + data['error'] + '</strong></p>').removeClass('hidden').addClass('error');
-    //
-    //             // Hide error message 5 seconds after showing it
-    //             setTimeout(function () {
-    //                 $('#info').addClass('hidden')
-    //             }, 5000);
-    //         } else {
-    //             viewer.entities.resumeEvents();
-    //             $('#info').html('<p><strong>An unexplainable error occurred. Why? Who knows...</strong></p>').removeClass('hidden');
-    //         };
+            if ("success" in data) {
+                if ("ts_pairs_data" in data) {
+                    var returned_tsPairsData = JSON.parse(data.ts_pairs_data).ts_pairs;
+
+                    initChart(returned_tsPairsData, watershed, subbasin, comid);
+                };
+            } else if ("error" in data) {
+                $('#nc-chart').addClass('hidden')
+                $('#container').html('<p class="alert alert-danger" style="text-align: center"><strong>' + data['error'] + '</strong></p>').removeClass('hidden').addClass('error');
+
+                // Hide error message 5 seconds after showing it
+                setTimeout(function () {
+                    $('#container').addClass('hidden')
+                }, 5000);
+            } else {
+                viewer.entities.resumeEvents();
+                $('#container').html('<p><strong>An unexplainable error occurred. Why? Who knows...</strong></p>').removeClass('hidden');
+            };
         }
     });
 };
 
-function initChart() {
-    $('#container').bind('mousemove touchmove touchstart', function (e) {
-        var chart,
-            point,
-            i,
-            event;
-
-        for (i = 0; i < Highcharts.charts.length; i = i + 1) {
-            chart = Highcharts.charts[i];
-            event = chart.pointer.normalize(e.originalEvent); // Find coordinates within the chart
-            point = chart.series[0].searchPoint(event, true); // Get the hovered point
-
-            if (point) {
-                point.highlight(e);
+function initChart(data, watershed, subbasin, id) {
+    Highcharts.chart('container', {
+        chart: {
+            zoomType: 'x'
+        },
+        title: {
+            text: 'Forecast'
+        },
+        subtitle: {
+            text: watershed.charAt(0).toUpperCase() + watershed.slice(1) + ' (' + subbasin.charAt(0).toUpperCase() + subbasin.slice(1) + '): ' + id
+        },
+        xAxis: {
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: 'Flow (CMS)'
             }
-        }
-    });
-    /**
-     * Override the reset function, we don't need to hide the tooltips and crosshairs.
-     */
-    Highcharts.Pointer.prototype.reset = function () {
-        return undefined;
-    };
-
-    /**
-     * Highlight a point by showing tooltip, setting hover state and draw crosshair
-     */
-    Highcharts.Point.prototype.highlight = function (event) {
-        this.onMouseOver(); // Show the hover marker
-        this.series.chart.tooltip.refresh(this); // Show the tooltip
-        this.series.chart.xAxis[0].drawCrosshair(event, this); // Show the crosshair
-    };
-
-    /**
-     * Synchronize zooming through the setExtremes event handler.
-     */
-    function syncExtremes(e) {
-        var thisChart = this.chart;
-
-        if (e.trigger !== 'syncExtremes') { // Prevent feedback loop
-            Highcharts.each(Highcharts.charts, function (chart) {
-                if (chart !== thisChart) {
-                    if (chart.xAxis[0].setExtremes) { // It is null while updating
-                        chart.xAxis[0].setExtremes(e.min, e.max, undefined, false, {trigger: 'syncExtremes'});
+        },
+        legend: {
+            enabled: false
+        },
+        plotOptions: {
+            area: {
+                fillColor: {
+                    linearGradient: {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 1
+                    },
+                    stops: [
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                    ]
+                },
+                lineWidth: 1,
+                states: {
+                    hover: {
+                        lineWidth: 1
                     }
-                }
-            });
-        }
-    }
+                },
+                threshold: null
+            }
+        },
 
-    // Get the data. The contents of the data file can be viewed at
-    // https://github.com/highcharts/highcharts/blob/master/samples/data/activity.json
-    $.getJSON('https://www.highcharts.com/samples/data/jsonp.php?filename=activity.json&callback=?', function (activity) {
-        $.each(activity.datasets, function (i, dataset) {
-
-            // Add X values
-            dataset.data = Highcharts.map(dataset.data, function (val, j) {
-                return [activity.xData[j], val];
-            });
-
-            $('<div class="chart">')
-                .appendTo('#container')
-                .highcharts({
-                    chart: {
-                        marginLeft: 40, // Keep all charts left aligned
-                        spacingTop: 20,
-                        spacingBottom: 20
-                    },
-                    title: {
-                        text: dataset.name,
-                        align: 'left',
-                        margin: 0,
-                        x: 30
-                    },
-                    credits: {
-                        enabled: false
-                    },
-                    legend: {
-                        enabled: false
-                    },
-                    xAxis: {
-                        crosshair: true,
-                        events: {
-                            setExtremes: syncExtremes
-                        },
-                        labels: {
-                            format: '{value} km'
-                        }
-                    },
-                    yAxis: {
-                        title: {
-                            text: null
-                        }
-                    },
-                    tooltip: {
-                        positioner: function () {
-                            return {
-                                x: this.chart.chartWidth - this.label.width, // right aligned
-                                y: -1 // align to title
-                            };
-                        },
-                        borderWidth: 0,
-                        backgroundColor: 'none',
-                        pointFormat: '{point.y}',
-                        headerFormat: '',
-                        shadow: false,
-                        style: {
-                            fontSize: '18px'
-                        },
-                        valueDecimals: dataset.valueDecimals
-                    },
-                    series: [{
-                        data: dataset.data,
-                        name: dataset.name,
-                        type: dataset.type,
-                        color: Highcharts.getOptions().colors[i],
-                        fillOpacity: 0.3,
-                        tooltip: {
-                            valueSuffix: ' ' + dataset.unit
-                        }
-                    }]
-                });
-        });
+        series: [{
+            type: 'area',
+            name: 'Forecast',
+            data: data
+        }]
     });
 };
