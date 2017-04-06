@@ -112,6 +112,7 @@ $(function () {
                 var model = location.pathname.split('hydroviewer/')[1].replace('/','');
                 var startdate = '';
 
+                $('#info').addClass('hidden');
                 get_available_dates(watershed, subbasin);
                 get_time_series(model, watershed, subbasin, comid, startdate);
 
@@ -191,6 +192,58 @@ function get_available_dates(watershed, subbasin) {
     });
 };
 
+function get_return_periods(watershed, subbasin, comid) {
+    $.ajax({
+        type: 'GET',
+        url: 'get-return-periods/',
+        dataType: 'json',
+        data: {
+            'watershed': watershed,
+            'subbasin': subbasin,
+            'comid': comid
+        },
+        error: function () {
+            $('#info').html(
+                '<p class="alert alert-warning" style="text-align: center"><strong>Return Periods are not available for this dataset.</strong></p>'
+            );
+
+            $('#info').removeClass('hidden');
+        },
+        success: function (data) {
+            $("#container").highcharts().yAxis[0].addPlotBand({
+                from: parseFloat(data.return_periods.twenty),
+                to: parseFloat(data.return_periods.max),
+                color: 'rgba(128,0,128,0.4)',
+                id: '20-yr',
+                label: {
+                    text: '20-yr',
+                    align: 'right'
+                }
+            });
+            $("#container").highcharts().yAxis[0].addPlotBand({
+                from: parseFloat(data.return_periods.ten),
+                to: parseFloat(data.return_periods.twenty),
+                color: 'rgba(255,0,0,0.3)',
+                id: '10-yr',
+                label: {
+                    text: '10-yr',
+                    align: 'right'
+                }
+            });
+            $("#container").highcharts().yAxis[0].addPlotBand({
+                from: parseFloat(data.return_periods.two),
+                to: parseFloat(data.return_periods.ten),
+                color: 'rgba(255,255,0,0.3)',
+                id: '2-yr',
+                label: {
+                    text: '2-yr',
+                    align: 'right'
+                }
+            });
+        }
+    });
+};
+
 function get_time_series(model, watershed, subbasin, comid, startdate) {
     $.ajax({
         type: 'GET',
@@ -203,9 +256,9 @@ function get_time_series(model, watershed, subbasin, comid, startdate) {
             'comid': comid,
             'startdate': startdate
         },
-        error: function (jqXHR, textStatus, errorThrown) {
-            // $('#info').html('<p class="alert alert-danger" style="text-align: center"><strong>An unknown error occurred while retrieving the data</strong></p>');
-            // clearErrorSelection();
+        error: function () {
+            $('#info').html('<p class="alert alert-danger" style="text-align: center"><strong>An unknown error occurred while retrieving the forecast</strong></p>');
+            $('#info').removeClass('hidden');
         },
         success: function (data) {
             if ("success" in data) {
@@ -213,18 +266,18 @@ function get_time_series(model, watershed, subbasin, comid, startdate) {
                     var returned_tsPairsData = JSON.parse(data.ts_pairs_data).ts_pairs;
 
                     initChart(returned_tsPairsData, watershed, subbasin, comid);
+                    get_return_periods(watershed, subbasin, comid);
                 };
             } else if ("error" in data) {
-                $('#nc-chart').addClass('hidden')
-                $('#container').html('<p class="alert alert-danger" style="text-align: center"><strong>' + data['error'] + '</strong></p>').removeClass('hidden').addClass('error');
+                $('#info').html('<p class="alert alert-danger" style="text-align: center"><strong>An unknown error occurred while retrieving the forecast</strong></p>');
+                $('#info').removeClass('hidden');
 
                 // Hide error message 5 seconds after showing it
                 setTimeout(function () {
-                    $('#container').addClass('hidden')
+                    $('#info').addClass('hidden')
                 }, 5000);
             } else {
-                viewer.entities.resumeEvents();
-                $('#container').html('<p><strong>An unexplainable error occurred. Why? Who knows...</strong></p>').removeClass('hidden');
+                $('#info').html('<p><strong>An unexplainable error occurred.</strong></p>').removeClass('hidden');
             };
         }
     });
@@ -242,15 +295,18 @@ function initChart(data, watershed, subbasin, id) {
             text: watershed.charAt(0).toUpperCase() + watershed.slice(1) + ' (' + subbasin.charAt(0).toUpperCase() + subbasin.slice(1) + '): ' + id
         },
         xAxis: {
+            title: {
+                text: 'Date (UTC)'
+            },
             type: 'datetime'
         },
         yAxis: {
             title: {
-                text: 'Flow (CMS)'
-            }
+                text: 'Flow (cms)'
+            },
         },
         legend: {
-            enabled: false
+            enabled: true
         },
         plotOptions: {
             area: {
@@ -278,7 +334,7 @@ function initChart(data, watershed, subbasin, id) {
 
         series: [{
             type: 'area',
-            name: 'Forecast',
+            name: 'Mean Forecast',
             data: data
         }]
     });

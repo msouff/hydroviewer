@@ -89,7 +89,6 @@ def get_time_series(request):
                                watershed + '&subbasin_name=' + subbasin + '&reach_id=' + comid + '&start_folder=' +
                                startdate + '&stat_type=mean', headers={'Authorization': 'Token 72b145121add58bcc5843044d9f1006d9140b84b'})
 
-
             api_call = res.content
             data = api_call.split('dateTimeUTC="')
             data.pop(0)
@@ -144,3 +143,18 @@ def get_available_dates(request):
         "available_dates": json.dumps(dates)
     })
 
+
+def get_return_periods(request):
+    get_data = request.GET
+
+    watershed = get_data['watershed']
+    subbasin = get_data['subbasin']
+    comid = get_data['comid']
+
+    res = requests.get('https://tethys.byu.edu/apps/streamflow-prediction-tool/api/GetReturnPeriods/?watershed_name=' + watershed +
+                       '&subbasin_name=' + subbasin + '&reach_id=' + comid,
+                       headers={'Authorization': 'Token 72b145121add58bcc5843044d9f1006d9140b84b'})
+
+    return JsonResponse({
+        "return_periods": eval(res.content)
+    })
