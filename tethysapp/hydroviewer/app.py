@@ -38,10 +38,13 @@ class Hydroviewer(TethysAppBase):
                            controller='hydroviewer.controllers.get_available_dates'),
                     UrlMap(name='get-time-series',
                            url='ecmwf-rapid/get-time-series',
-                           controller='hydroviewer.controllers.get_time_series'),
+                           controller='hydroviewer.controllers.ecmwf_get_time_series'),
                     UrlMap(name='get-return-periods',
                            url='ecmwf-rapid/get-return-periods',
                            controller='hydroviewer.controllers.get_return_periods'),
+                    UrlMap(name='get-time-series',
+                           url='lis-rapid/get-time-series',
+                           controller='hydroviewer.controllers.lis_get_time_series'),
         )
 
         return url_maps

@@ -51,14 +51,27 @@
     padding: 0;
 }
 
-/*OpenLayers map*/
+#help {
+    max-width: 100%;
+    max-height: 100%;
+    border: 3px solid black;
+}
+
+#main-body {
+    height: 100%;
+    padding: 20px;
+}
+
+#overview {
+    font-size: 15pt;
+    padding: 0 20px 0 20px;
+}
+
 #map {
     height: 100%;
 }
 
 #graph {
-    /*background-color: #425e17;*/
-    /*opacity: 0.5;*/
     height: 100%;
 }
 

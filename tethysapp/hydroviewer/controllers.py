@@ -8,6 +8,8 @@ import requests
 import json
 import datetime as dt
 import time
+import netCDF4 as nc
+import numpy as np
 
 @login_required()
 def home(request):
@@ -49,7 +51,7 @@ def ecmwf(request):
 
     context = {
         'model_input': model_input,
-        'watershed_select': watershed_select,
+        'watershed_select': watershed_select
     }
 
     return render(request, 'hydroviewer/ecmwf.html', context)
@@ -64,14 +66,22 @@ def lis(request):
                               initial=['LIS-RAPID'],
                               original=True)
 
+    watershed_list = [['Nepal (Bagmati)', 1], ['Select Watershed', '']]
+    watershed_select = SelectInput(display_text='',
+                                   name='watershed',
+                                   options=watershed_list,
+                                   initial=['Select Watershed'],
+                                   original=True)
+
     context = {
         'model_input': model_input,
+        'watershed_select': watershed_select
     }
 
     return render(request, 'hydroviewer/lis.html', context)
 
 
-def get_time_series(request):
+def ecmwf_get_time_series(request):
     get_data = request.GET
 
     try:
@@ -94,7 +104,6 @@ def get_time_series(request):
             data.pop(0)
 
             ts_pairs = []
-            ts_pairs_data = {}
             for elem in data:
                 date = time.mktime(dt.datetime.strptime(elem.split('"  methodCode="1"  sourceCode="1"  qualityControlLevelCode="1" >')[0],
                                                         '%Y-%m-%dT%H:%M:%S').timetuple())
@@ -102,6 +111,47 @@ def get_time_series(request):
 
                 ts_pairs.append([date * 1e3, value])
 
+            ts_pairs_data = {}
+            ts_pairs_data['watershed'] = watershed
+            ts_pairs_data['subbasin'] = subbasin
+            ts_pairs_data['id'] = comid
+            ts_pairs_data['ts_pairs'] = ts_pairs
+
+            return JsonResponse({
+                "success": "Data analysis complete!",
+                "ts_pairs_data": json.dumps(ts_pairs_data)
+            })
+
+    except Exception as e:
+        print str(e)
+        return JsonResponse({'error': 'No data found for the selected reach.'})
+
+
+def lis_get_time_series(request):
+    get_data = request.GET
+
+    try:
+        model = get_data['model']
+        watershed = get_data['watershed']
+        subbasin = get_data['subbasin']
+        comid = get_data['comid']
+
+        if model == 'lis-rapid':
+            res = nc.Dataset('/rapid/lis/' + watershed + '-' + subbasin + '/Qout_nasa_lis_72hr_20150801to20150831.nc')
+
+            dates = res.variables['time'][:] * 1e3
+
+            comid_list = res.variables['rivid'][:]
+            comid_index = int(np.where(comid_list == int(comid))[0])
+
+            values = []
+            for l in list(res.variables['Qout'][:]):
+                values.append(float(l[comid_index]))
+                print type(l[comid_index])
+
+            ts_pairs = [list(a) for a in zip(dates, values)]
+
+            ts_pairs_data = {}
             ts_pairs_data['watershed'] = watershed
             ts_pairs_data['subbasin'] = subbasin
             ts_pairs_data['id'] = comid

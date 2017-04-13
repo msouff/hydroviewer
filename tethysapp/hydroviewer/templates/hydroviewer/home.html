@@ -1,7 +1,41 @@
 {% extends "hydroviewer/base.html" %}
 
-{% block app_content %}
+{% load staticfiles %}
 
+{% block app_content %}
+<style>
+  #app-actions {
+    visibility: hidden;
+  }
+</style>
+<div id="main-body" class="row">
+  <p id="overview"><b>
+    This web application was created to allow users to visualize hydrologic model results
+    from different sources. It currently can display ECMWF and LIS model results.
+  </b></p>
+  <div class="col-md-5">
+    <h2>How it works</h2>
+    <h6>1. Select a hydrologic model from the Select Model dropdown.</h6>
+    <h6>2. Click submit to load the sub page for that specific model.</h6>
+    <h6>3. Select a watershed from the Select Watershed dropdown.</h6>
+    <h6>4. Once a watershed is selected, the map will automatically zoom to that specific watershed.
+      Click on any of the stream reaches within the watershed.</h6>
+    <h6>5. A hydrograph for the selected reach with the most current streamflow result will be displayed
+      in the grapth area next to the map.</h6>
+    <h6>6. If previous dates are available, the Select Date dropdown will be displayed on top of the graph.
+      Select any of the available dates to display the forecast for that specific date in the graph.</h6>
+    <h6>7. Click this button to return to the main page.</h6>
+    <h6>8. Click this button to exit the application.</h6>
+  </div>
+  <div class="col-md-7">
+    <img id="help" src="/static/hydroviewer/images/screenshot_help.jpg">
+    <div style="text-align: center">
+      <a href="http://www.icimod.org/" target="_blank">
+        <img src="/static/hydroviewer/images/ICIMOD_logo.JPG" width="70%">
+      </a>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block app_actions %}

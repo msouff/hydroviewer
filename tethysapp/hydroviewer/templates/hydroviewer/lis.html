@@ -6,7 +6,13 @@
 
 {% block app_content %}
   <div id="map"></div>
-  <div id="graph" class="hidden"></div>
+  <div id="graph" class="hidden">
+    <div id="dates" class="hidden form-group" style="padding: 30px 30px 20px 0">
+      <select id="datesSelect" class="form-control"></select>
+    </div>
+    <div id="container" style="padding-right: 30px"></div>
+    <div id="info" class="hidden"></div>
+  </div>
 {% endblock %}
 
 {% block app_actions %}

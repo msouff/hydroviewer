@@ -178,6 +178,10 @@ function get_available_dates(watershed, subbasin) {
             );
 
             $('#dates').removeClass('hidden');
+
+            setTimeout(function () {
+                $('#dates').addClass('hidden')
+            }, 5000);
         },
         success: function (dates) {
             datesParsed = JSON.parse(dates.available_dates)
@@ -208,6 +212,10 @@ function get_return_periods(watershed, subbasin, comid) {
             );
 
             $('#info').removeClass('hidden');
+
+            setTimeout(function () {
+                $('#info').addClass('hidden')
+            }, 5000);
         },
         success: function (data) {
             $("#container").highcharts().yAxis[0].addPlotBand({
@@ -259,6 +267,10 @@ function get_time_series(model, watershed, subbasin, comid, startdate) {
         error: function () {
             $('#info').html('<p class="alert alert-danger" style="text-align: center"><strong>An unknown error occurred while retrieving the forecast</strong></p>');
             $('#info').removeClass('hidden');
+
+            setTimeout(function () {
+                $('#info').addClass('hidden')
+            }, 5000);
         },
         success: function (data) {
             if ("success" in data) {
@@ -272,7 +284,6 @@ function get_time_series(model, watershed, subbasin, comid, startdate) {
                 $('#info').html('<p class="alert alert-danger" style="text-align: center"><strong>An unknown error occurred while retrieving the forecast</strong></p>');
                 $('#info').removeClass('hidden');
 
-                // Hide error message 5 seconds after showing it
                 setTimeout(function () {
                     $('#info').addClass('hidden')
                 }, 5000);
@@ -328,7 +339,10 @@ function initChart(data, watershed, subbasin, id) {
                         lineWidth: 1
                     }
                 },
-                threshold: null
+                threshold: null,
+                marker: {
+                    enabled: false
+                }
             }
         },
 
