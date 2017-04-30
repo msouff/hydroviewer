@@ -116,6 +116,12 @@ $(function () {
                 get_available_dates(watershed, subbasin);
                 get_time_series(model, watershed, subbasin, comid, startdate);
 
+                var dateSelect = document.getElementById("datesSelect");
+                dateSelect.addEventListener("change", function() { //when date is changed
+                    startdate = this.value;
+                    get_time_series(model, watershed, subbasin, comid, startdate); //get forecast for selected date
+                });
+
             });
 
         } else {
