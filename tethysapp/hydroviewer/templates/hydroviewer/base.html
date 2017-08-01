@@ -13,13 +13,14 @@
 
 {# The name you provided in your app.py is accessible through the tethys_app.name context variable #}
 {% block app_title %}
-<div class="row">
-  <div class="col-md-3">
-    {{ tethys_app.name }}
-  </div>
-  <div class="col-md-5">
+  {{ tethys_app.name }}
+{% endblock %}
+
+{% block header_buttons %}
+<div id="headerCustomButtons" class="row">
+  <div class="col-md-6">
     <div class="row">
-      <div id="modelSelect" class="col-md-9" style="padding-top: 14px;">
+      <div id="modelSelect" class="col-md-9">
           {% gizmo select_input model_input %}
       </div>
       <div class="col-md-3">
@@ -27,9 +28,11 @@
       </div>
     </div>
   </div>
-  <div id="watershedSelect" class="col-md-4" style="padding-top: 14px;">
-    {% gizmo select_input watershed_select %}
-  </div>
+  {% if watershed_select%}
+    <div id="watershedSelect" class="col-md-6">
+      {% gizmo select_input watershed_select %}
+    </div>
+  {% endif %}
 </div>
 {% endblock %}
 

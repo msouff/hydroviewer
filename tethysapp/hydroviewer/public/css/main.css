@@ -1,31 +1,7 @@
-#app-header .tethys-app-header {
-    height: 60px;
-}
-
-#app-header .tethys-app-header .toggle-nav {
-    margin-top: 10px;
-}
-
-#app-header .tethys-app-header .icon-wrapper img {
-    height: 50px;
-}
-
-#app-header .tethys-app-header .icon-wrapper {
+#headerCustomButtons {
+    margin-right: 15px;
     margin-left: 15px;
-    padding: 5px 10px;
-}
-
-#app-header .tethys-app-header .app-title-wrapper .app-title {
-    padding: 0;
-    padding-left: 85px;
-}
-
-#app-header .tethys-app-header .exit-button {
-    margin-top: 10px;
-}
-
-#app-header .tethys-app-header .exit-button a {
-    padding: 5px 10px;
+    width: 800px
 }
 
 #app-content-wrapper #app-content #app-actions{
@@ -34,7 +10,7 @@
 }
 
 #app-content-wrapper #app-content #app-navigation {
-    padding-top: 60px;
+    padding-top: 50px;
 }
 
 #app-content-wrapper #app-content #app-navigation .nav {
@@ -43,7 +19,7 @@
 
 #app-content-wrapper #app-content{
     height: 100%;
-    padding-top: 60px;
+    padding-top: 50px;
     padding-bottom: 50px;
 }
 
